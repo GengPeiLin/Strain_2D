@@ -50,14 +50,23 @@ def verify_inputs_gpsgridder(method_specific_dict):
 
 def compute_gpsgridder(myVelfield, range_strain, inc, poisson, fd, eigenvalue, tempoutdir):
     print("------------------------------\nComputing strain via gpsgridder method.")
-    velocity_io.write_gmt_format(myVelfield, "tempgps.txt")
-    command = "gmt gpsgridder tempgps.txt" + \
+    from datetime import datetime
+
+    # 取得當前時間，並格式化為指定格式的字串
+    current_time = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+    # 組合成 log 檔案名稱
+    misfit_filename = f"misfitfile_{current_time}.txt"
+    tempgps_filename = f"tempgps_{current_time}.txt"
+    velocity_io.write_gmt_format(myVelfield, tempgps_filename)
+
+    command = "gmt gpsgridder " + tempgps_filename + \
               " -R" + utilities.get_string_range(range_strain, x_buffer=inc[0]/2, y_buffer=inc[1]/2) + \
               " -I" + utilities.get_string_inc(inc) + \
               " -S" + poisson + \
               " -Fd" + fd + \
               " -C" + eigenvalue + \
-              " -Emisfitfile.txt -fg -r -Gnc_%s.nc"
+              " -E" + misfit_filename + " -fg -r -Gnc_%s.nc"
     print(command)
     subprocess.call(command, shell=True)  # makes a netcdf grid file
     # -R = range. -I = interval. -E prints the model and data fits at the input stations (very useful).
@@ -67,11 +76,13 @@ def compute_gpsgridder(myVelfield, range_strain, inc, poisson, fd, eigenvalue, t
     # You should experiment with Fd and C values to find something that you like (good fit without overfitting).
     # For Northern California, I like -Fd0.01 -C0.005. -R-125/-121/38/42.2
 
-    if os.path.isfile('tempgps.txt'):
-        os.remove('tempgps.txt')
+    if os.path.isfile(tempgps_filename):
+        os.remove(tempgps_filename)
     if os.path.isfile('gmt.history'):
         os.remove('gmt.history')
-    shutil.move(src='misfitfile.txt', dst=os.path.join(tempoutdir, 'misfitfile.txt'))
+    shutil.move(src=tempgps_filename, dst=os.path.join(tempoutdir, tempgps_filename))
+    # os.getcwd()
+    shutil.move(src=misfit_filename, dst=os.path.join(tempoutdir, misfit_filename))
     shutil.move(src='nc_u.nc', dst=os.path.join(tempoutdir, 'nc_u.nc'))
     shutil.move(src='nc_v.nc', dst=os.path.join(tempoutdir, 'nc_v.nc'))
 

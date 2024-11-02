@@ -59,7 +59,7 @@ def get_string_inc(float_inc):
     :returns: string separated by slash, e.g., '0.04/0.04'
     :rtype: string
     """
-    string_inc = str(float_inc[0]) + '/' + str(float_inc[1])
+    string_inc = str(float_inc[0]) + '+e/' + str(float_inc[1]) + '+e'
     return string_inc
 
 

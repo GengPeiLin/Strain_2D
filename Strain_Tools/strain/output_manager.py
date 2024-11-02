@@ -28,6 +28,14 @@ def outputs_2d(Ve, Vn, rot, exx, exy, eyy, MyParams, myVelfield, residfield):
     velocity_io.write_gmt_format(positive_eigs, MyParams.outdir + 'positive_eigs.txt')
     velocity_io.write_gmt_format(negative_eigs, MyParams.outdir + 'negative_eigs.txt')
 
+    original_indices = np.linspace(0, len(MyParams.ydata)-1, num=len(MyParams.ydata))
+    # original_indices
+    # 新的索引範圍（0 到 513），重新取樣為 514 個點
+    new_indices = np.linspace(0, len(MyParams.ydata), num=len(MyParams.ydata)+1)
+
+    # # 對經緯度數據進行插值
+    new_lats = np.interp(new_indices, original_indices, MyParams.ydata)
+
     # First create an xarray data multi-cube to write
     ds = Dataset(
         {
@@ -44,8 +52,9 @@ def outputs_2d(Ve, Vn, rot, exx, exy, eyy, MyParams, myVelfield, residfield):
         },
         coords={
             "x": ('x', MyParams.xdata),
-            "y": ('y', MyParams.ydata),
-        },
+            # "y": ('y', MyParams.ydata),
+            "y": ('y', new_lats),
+                    },
     )
 
     output_filename = os.path.join(MyParams.outdir, '{}_strain.nc'.format(MyParams.strain_method))

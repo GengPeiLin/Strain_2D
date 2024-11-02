@@ -80,7 +80,6 @@ def compute_gpsgridder(myVelfield, range_strain, inc, poisson, fd, eigenvalue, t
         os.remove(tempgps_filename)
     if os.path.isfile('gmt.history'):
         os.remove('gmt.history')
-    shutil.move(src=tempgps_filename, dst=os.path.join(tempoutdir, tempgps_filename))
     # os.getcwd()
     shutil.move(src=misfit_filename, dst=os.path.join(tempoutdir, misfit_filename))
     shutil.move(src='nc_u.nc', dst=os.path.join(tempoutdir, 'nc_u.nc'))

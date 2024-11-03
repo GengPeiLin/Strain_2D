@@ -82,7 +82,7 @@ def get_gmt_range_inc(lons, lats):
     edge_of_north_pixel = np.round(lats[-1] + lat_inc/2, 5)
     gmt_range_string = str(edge_of_west_pixel) + '/' + str(edge_of_east_pixel) + '/' + str(edge_of_south_pixel) + \
                        '/' + str(edge_of_north_pixel)
-    gmt_inc_string = str(lon_inc) + '/' + str(lat_inc)
+    gmt_inc_string = str(lon_inc) + '+e/' + str(lat_inc) + '+e '
     return gmt_range_string, gmt_inc_string
 
 
@@ -226,9 +226,9 @@ def make_gmt_landmask(lons, lats, grd_filename):
     :returns: landmask, 2D array
     """
     gmt_range_string, gmt_inc_string = get_gmt_range_inc(np.array(lons), np.array(lats))
-    subprocess.call(['gmt', 'grdlandmask', '-G'+grd_filename, '-R'+gmt_range_string, '-I'+gmt_inc_string, '-r'],
+    subprocess.call(['gmt ', ' grdlandmask ', ' -G'+grd_filename, ' -R'+gmt_range_string, ' -I'+gmt_inc_string, ' -r'],
                     shell=False)  # guarantee pixel node registration
-    print('gmt grdlandmask -G'+grd_filename+' -R'+gmt_range_string+'-I'+gmt_inc_string+' -r')
+    print('gmt grdlandmask -G'+grd_filename+' -R'+gmt_range_string+' -I'+gmt_inc_string+' -r')
     landmask_array = read_landmask(grd_filename)
     if np.shape(landmask_array) != (len(lats), len(lons)):
         raise ValueError("Error! Landmask does not match the shape of lats/lons array.")
